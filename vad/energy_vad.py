@@ -28,7 +28,7 @@ class EnergyVAD:
             np.ndarray: VAD output of shape (num_frames,)
         '''
 
-        new_waveform, is_stereo = self._convert_to_mono_if_needed(waveform)
+        new_waveform = self._convert_to_mono_if_needed(waveform)
 
         # Pre-emphasis
         new_waveform = np.append(new_waveform[0], new_waveform[1:] - self.pre_emphasis * new_waveform[:-1])
@@ -82,21 +82,19 @@ class EnergyVAD:
         Returns:
             np.ndarray: waveform with VAD applied of shape (num_samples,)
         '''
-        processed_waveform, is_stereo = self._convert_to_mono_if_needed(waveform)
+        processed_waveform = self._convert_to_mono_if_needed(waveform)
 
+        
         vad = self(processed_waveform)
 
         shift = self.frame_shift * self.sample_rate // 1000
         new_waveform = []
-        for channel in range(waveform.shape[0]):
-            channel_waveform = []
-            for i in range(len(vad)):
-                if vad[i] == 1:
-                    if is_stereo:
-                        channel_waveform.extend(waveform[channel, i * shift : i * shift + shift])
-                    else:
-                        channel_waveform.extend(waveform[i * shift : i * shift + shift])
-            new_waveform.append(channel_waveform)
+        for i in range(len(vad)):
+            if vad[i] == 1:
+                new_waveform.extend(waveform[i * shift : i * shift + shift])
+            else:
+                for ii in range(shift):
+                    new_waveform.append( 0 )
 
         new_waveform = np.array(new_waveform)
 
@@ -111,12 +109,9 @@ class EnergyVAD:
             np.ndarray: waveform with dimension adjusted to (1, num_samples)
             bool: True if the signal was stereo, False otherwise
         '''
-        if waveform.ndim == 2 and waveform.shape[0] == 2:
+        if waveform.ndim == 2 and waveform.shape[1] == 2:
             is_stereo = True
             print("Warning: stereo audio detected, using only the first channel")
-            waveform = waveform[0]
-            waveform = waveform[np.newaxis, :]
-        else:
-            is_stereo = False
+            waveform = waveform.T[0].T
 
-        return waveform, is_stereo
+        return waveform
