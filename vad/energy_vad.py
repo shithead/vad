@@ -54,7 +54,7 @@ class EnergyVAD:
         frame_shift = self.frame_shift * self.sample_rate // 1000
 
         # Compute energy
-        energy = np.zeros((waveform.shape[0] - frame_length + frame_shift) // frame_shift)
+        energy = np.zeros((waveform.shape[0] - frame_length + frame_shift) // frame_shift + 1)
         for i in range(energy.shape[0]):
             energy[i] = np.sum(waveform[i * frame_shift : i * frame_shift + frame_length] ** 2)
 
