@@ -92,7 +92,10 @@ class EnergyVAD:
             channel_waveform = []
             for i in range(len(vad)):
                 if vad[i] == 1:
-                    channel_waveform.extend(waveform[channel, i * shift : i * shift + shift])
+                    if is_stereo:
+                        channel_waveform.extend(waveform[channel, i * shift : i * shift + shift])
+                    else:
+                        channel_waveform.extend(waveform[i * shift : i * shift + shift])
             new_waveform.append(channel_waveform)
 
         new_waveform = np.array(new_waveform)
