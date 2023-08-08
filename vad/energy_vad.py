@@ -110,7 +110,6 @@ class EnergyVAD:
             bool: True if the signal was stereo, False otherwise
         '''
         if waveform.ndim == 2 and waveform.shape[1] == 2:
-            is_stereo = True
             print("Warning: stereo audio detected, using only the first channel")
             waveform = waveform.T[0].T
 
